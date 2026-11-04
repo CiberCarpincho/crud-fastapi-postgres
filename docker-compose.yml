@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: tareasdb
+      DATABASE_URL: postgresql+psycopg2://admin:admin123@db:5432/tareasdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d tareasdb"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://admin:admin123@db:5432/tareasdb
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:
